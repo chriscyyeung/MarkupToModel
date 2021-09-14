@@ -135,6 +135,10 @@ class MarkupToModelWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.outputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.opacitySlider.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
 
+    self.observedMarkupNode = None
+    self.markupsObserverTag = None
+    self.ui.autoUpdateCheckBox.connect("toggled(bool)", self.onEnableAutoUpdate)
+
     # Buttons
     self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
 
@@ -236,9 +240,23 @@ class MarkupToModelWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputSelector.currentNodeID)
     self._parameterNode.SetNodeReferenceID("OutputVolume", self.ui.outputSelector.currentNodeID)
-    self.ui.outputSelector.currentNode().GetDisplayNode().SetOpacity(self.ui.opacitySlider.value)  #TODO: bugged
+    self.ui.outputSelector.currentNode().GetDisplayNode().SetOpacity(self.ui.opacitySlider.value)
 
     self._parameterNode.EndModify(wasModified)
+
+  def onEnableAutoUpdate(self, autoUpdate):
+    if self.markupsObserverTag:
+      self.observedMarkupNode.RemoveObserver(self.markupsObserverTag)
+      self.observedMarkupNode = None
+      self.markupsObserverTag = None
+    if autoUpdate and self.ui.inputSelector.currentNode:
+      self.observedMarkupNode = self.ui.inputSelector.currentNode()
+      self.markupsObserverTag = self.observedMarkupNode.AddObserver(
+        slicer.vtkMRMLMarkupsNode.PointModifiedEvent, self.onMarkupsUpdated
+      )
+  
+  def onMarkupsUpdated(self, caller=None, event=None):
+    self.onApplyButton()
 
   def onApplyButton(self):
     """
