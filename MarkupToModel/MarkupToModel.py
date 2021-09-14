@@ -133,6 +133,7 @@ class MarkupToModelWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # (in the selected parameter node).
     self.ui.inputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.outputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.opacitySlider.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
 
     # Buttons
     self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
@@ -235,6 +236,7 @@ class MarkupToModelWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputSelector.currentNodeID)
     self._parameterNode.SetNodeReferenceID("OutputVolume", self.ui.outputSelector.currentNodeID)
+    self.ui.outputSelector.currentNode().GetDisplayNode().SetOpacity(self.ui.opacitySlider.value)  #TODO: bugged
 
     self._parameterNode.EndModify(wasModified)
 
@@ -318,6 +320,7 @@ class MarkupToModelLogic(ScriptedLoadableModuleLogic):
     outputModel.CreateDefaultDisplayNodes()
     outputModel.GetDisplayNode().SetSliceIntersectionVisibility(True)
     outputModel.GetDisplayNode().SetColor(1, 0, 0)
+    outputModel.GetDisplayNode().SetOpacity(0.5)
     return True
 
 #
