@@ -224,8 +224,8 @@ class MarkupToModelWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     if self._parameterNode is None:
       return
-    self.ui.applyButton.enabled = self._parameterNode.GetNodeReference("InputVolume")
-    self.ui.applyButton.enabled = self._parameterNode.GetNodeReference("OutputVolume")
+    self.ui.applyButton.enabled = (self._parameterNode.GetNodeReference("InputVolume") 
+                                   and self._parameterNode.GetNodeReference("OutputVolume"))
 
   def updateParameterNodeFromGUI(self, caller=None, event=None):
     """
@@ -240,9 +240,11 @@ class MarkupToModelWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputSelector.currentNodeID)
     self._parameterNode.SetNodeReferenceID("OutputVolume", self.ui.outputSelector.currentNodeID)
-    self.ui.outputSelector.currentNode().GetDisplayNode().SetOpacity(self.ui.opacitySlider.value)
 
     self._parameterNode.EndModify(wasModified)
+
+    if self.ui.outputSelector.currentNode() is not None and self.ui.outputSelector.currentNode().GetDisplayNode() is not None:
+      self.ui.outputSelector.currentNode().GetDisplayNode().SetOpacity(self.ui.opacitySlider.value)
 
   def onEnableAutoUpdate(self, autoUpdate):
     if self.markupsObserverTag:
