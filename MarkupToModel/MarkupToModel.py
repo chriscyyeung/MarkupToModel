@@ -339,8 +339,6 @@ class MarkupToModelLogic(ScriptedLoadableModuleLogic):
     outputModel.SetAndObservePolyData(self.getModelFromMarkups(inputMarkups))
     outputModel.CreateDefaultDisplayNodes()
     outputModel.GetDisplayNode().SetSliceIntersectionVisibility(True)
-    outputModel.GetDisplayNode().SetColor(1, 0, 0)
-    outputModel.GetDisplayNode().SetOpacity(0.5)
     return True
 
 #
